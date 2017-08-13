@@ -4,9 +4,9 @@
 	else if(typeof define === 'function' && define.amd)
 		define([], factory);
 	else if(typeof exports === 'object')
-		exports["mojs-util-get-radial-point"] = factory();
+		exports["mojs-util-parse-color-to-rgba"] = factory();
 	else
-		root["mojs-util-get-radial-point"] = factory();
+		root["mojs-util-parse-color-to-rgba"] = factory();
 })(this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -100,7 +100,7 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
     global.mojs = mod.exports;
   }
 })(this, function (exports) {
-  "use strict";
+  'use strict';
 
   (function (global, factory) {
     if (true) {
@@ -118,32 +118,88 @@ var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_
       global.mojs = mod.exports;
     }
   })(undefined, function (exports) {
-    "use strict";
+    'use strict';
 
     Object.defineProperty(exports, "__esModule", {
       value: true
     });
+
     /**
-     * `getRadialPoint` - function to get a point on imaginary circle
-     *                    with provided parameters.
-     *
-     * `Note:` This function is explicetely recieves a target object to set
-     *         the result on, this was made because producing a lot of
-     *          new return objects on every animation frame will cause GC issues.
-     *
-     * @param {Number} centerX Circle's center `x` coordinate.
-     * @param {Number} centerY Circle's center `y` coordinate.
-     * @param {Number} radius Circle's radius.
-     * @param {Number} angle Angle of a line from center to a point.
-     * @param {Object} target Object to set the result on.
+     * DOMDiv - and element that is added to DOM for enviroment test purposes.
      */
-    var getRadialPoint = exports.getRadialPoint = function (centerX, centerY, radius, angle, target) {
-      var radAngle = (angle - 90) * 0.017453292519943295; // Math.PI / 180
-      target.x = centerX + Math.cos(radAngle) * radius;
-      target.y = centerY + Math.sin(radAngle) * radius;
+    var DOMDiv = document.createElement('div');
+    document.body.append(DOMDiv);
+
+    /**
+     * `normalizeHex` - Function to normalize part of a HEX color to FF format,
+     *                  if one character passed, return doubled version of it.
+     *
+     * @param {Steing} Color part to normalize.
+     * @param {Steing} Normalized part of a color.
+     */
+    var normalizeHex = function (string) {
+      // eslint-disable-line arrow-body-style
+      return string.length === 2 ? string : string + string;
     };
 
-    exports.default = getRadialPoint;
+    /**
+     * `parseHEXColor` - function to parse #HEX colors.
+     */
+    var parseHEXColor = function (color) {
+      var result = /^#?([a-f\d]{1,2})([a-f\d]{1,2})([a-f\d]{1,2})$/i.exec(color);
+      if (result) {
+        return {
+          r: parseInt(normalizeHex(result[1]), 16),
+          g: parseInt(normalizeHex(result[2]), 16),
+          b: parseInt(normalizeHex(result[3]), 16),
+          a: 1
+        };
+      }
+    };
+
+    /**
+     * Function to parse a color string to color object.
+     *
+     * @param {String} String to parse.
+     * @returns {Object} Color object.
+     */
+    var parseColorToRgba = exports.parseColorToRgba = function (color) {
+      var originColor = color;
+      // #HEX
+      if (color[0] === '#') {
+        return parseHEXColor(color);
+      }
+
+      var isRgb = color[0] === 'r' && color[1] === 'g' && color[2] === 'b';
+      // if color is not `rgb`, it is a shortcut (`cyan`, `hotpink` etc)
+      // so we need to set the color on DOM element and get the calculated color
+      if (!isRgb) {
+        DOMDiv.style.color = 'black';
+        DOMDiv.style.color = color;
+        color = window.getComputedStyle(DOMDiv).color;
+      }
+
+      // parse `rgb` color
+      var regexString1 = '^rgba?\\((\\d{1,3}),\\s?(\\d{1,3}),';
+      var regexString2 = '\\s?(\\d{1,3}),?\\s?(\\d{1}|0?\\.\\d{1,})?\\)$';
+      var result = new RegExp(regexString1 + regexString2, 'gi').exec(color);
+      var a = parseFloat(result[4] || 1);
+
+      if (result) {
+        var r = parseInt(result[1], 10);
+        var g = parseInt(result[2], 10);
+        var b = parseInt(result[3], 10);
+        // if origin color was not black but black
+        // returned from the DOM - that's an error
+        return originColor !== 'black' && r === 0 && g === 0 && b === 0 && a === 1 ? { isError: true } : { r: r, g: g, b: b, a: a };
+      }
+
+      return {
+        isError: true
+      };
+    };
+
+    exports.default = parseColorToRgba;
   });
 });
 
