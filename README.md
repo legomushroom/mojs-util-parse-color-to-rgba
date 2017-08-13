@@ -1,0 +1,1 @@
+# mojs helper that gets radial point
