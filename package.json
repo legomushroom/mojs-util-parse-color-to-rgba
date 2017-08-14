@@ -1,7 +1,7 @@
 {
-  "name": "mojs-util-color-to-rgba",
+  "name": "mojs-util-parse-color-to-rgba",
   "description": "mojs util that parses color to `rgba` representation",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "license": "MIT",
   "private": false,
   "scripts": {
@@ -14,7 +14,7 @@
     "stats:js": "echo \"Size of mo.js is $(gzip -c build/mo.js | wc -c) bytes gzipped\"",
     "prepush": "npm run lint && npm test"
   },
-  "main": "build/get-radial-point.js",
+  "main": "build/parse-color-to-rgba.js",
   "keywords": [
     "motion",
     "effects",
