@@ -1,6 +1,6 @@
 {
   "name": "mojs-util-color-to-rgba",
-  "description": "mojs helper parse color to `rgba` representation",
+  "description": "mojs util that parses color to `rgba` representation",
   "version": "0.10.0",
   "license": "MIT",
   "private": false,

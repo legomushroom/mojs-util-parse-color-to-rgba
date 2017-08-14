@@ -1,1 +1,1 @@
-# mojs helper that gets radial point
+# mojs util that parses a color to `rgba` reperesentation
